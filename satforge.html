@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SATForge – self-guided SAT prep</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f6fb;--card:#fff;--ink:#14213d;--mut:#5b6785;--line:#d9e0ee;--ac:#2f5bea;--acs:#e6ecff;--ok:#1e8e5a;--oks:#e2f5ec;--bad:#c8372d;--bads:#fde8e6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1730;--card:#17213f;--ink:#e8edfb;--mut:#9aa7c7;--line:#2a3763;--ac:#7c9bff;--acs:#22305f;--ok:#4cc38a;--oks:#14382b;--bad:#ff7a70;--bads:#431f23}}
+:root[data-theme="dark"]{--bg:#0f1730;--card:#17213f;--ink:#e8edfb;--mut:#9aa7c7;--line:#2a3763;--ac:#7c9bff;--acs:#22305f;--ok:#4cc38a;--oks:#14382b;--bad:#ff7a70;--bads:#431f23}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Bricolage Grotesque",system-ui,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;align-items:center;padding:1rem 1.25rem;border-bottom:1px solid var(--line);background:var(--card)}
+.logo{font-weight:800;font-size:1.35rem;letter-spacing:-.02em}nav{display:flex;gap:.25rem;flex-wrap:wrap}
+nav a{padding:.4rem .8rem;border-radius:8px;color:var(--mut);text-decoration:none;font-weight:700}nav a.on{background:var(--acs);color:var(--ac)}
+main{max-width:860px;margin:0 auto;padding:1.5rem 1.25rem 4rem}
+h1{font-size:clamp(1.8rem,5vw,2.8rem);line-height:1.1;margin:.2rem 0 .6rem;letter-spacing:-.03em;font-weight:800}h2{font-size:1.2rem;margin:1.6rem 0 .6rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1.1rem 1.25rem;margin:.8rem 0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.8rem}.stats b{display:block;font-size:2rem;line-height:1.1}.stats span{color:var(--mut);font-size:.9rem}
+button,.btn{font:inherit;font-weight:700;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:.55rem 1rem;border-radius:8px;cursor:pointer}
+button.p{background:var(--ac);border-color:var(--ac);color:#fff}button:focus-visible,a:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.chips{display:flex;gap:.4rem;flex-wrap:wrap;margin:.6rem 0}.chips button.on{background:var(--acs);border-color:var(--ac);color:var(--ac)}
+.q .pass{font-family:"Source Serif 4",serif;font-size:1.05rem;border-left:3px solid var(--ac);padding-left:.9rem;margin:.6rem 0}.q .st{font-family:"Source Serif 4",serif;font-size:1.15rem;margin:.5rem 0 .9rem}
+.meta{color:var(--mut);font-size:.85rem}.opt{display:flex;gap:.7rem;width:100%;text-align:left;margin:.4rem 0;align-items:flex-start}.opt i{font-style:normal;font-weight:800;min-width:1.4rem}
+.opt.ok{background:var(--oks);border-color:var(--ok)}.opt.no{background:var(--bads);border-color:var(--bad)}.opt.x{text-decoration:line-through;opacity:.5}
+.exp{margin-top:.8rem;padding:.8rem 1rem;background:var(--acs);border-radius:8px}.exp p{margin:.3rem 0}
+.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden}.bar div{height:100%;background:var(--ac)}.row{display:grid;grid-template-columns:150px 1fr 48px;gap:.7rem;align-items:center;margin:.4rem 0;font-size:.95rem}
+
+.timer{position:sticky;top:env(safe-area-inset-top,0px);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:.4rem .8rem;display:inline-block;font-weight:800}
+@media(max-width:520px){.row{grid-template-columns:100px 1fr 40px}}@media(prefers-reduced-motion:no-preference){.bar div{transition:width .5s}}
+.opt.sel{background:var(--acs);border-color:var(--ac)}.gt{color:var(--ok)}.rt{color:var(--bad)}
+.flip{perspective:900px;cursor:pointer;margin:.8rem 0}.inner{position:relative;min-height:220px;transition:transform .55s;transform-style:preserve-3d}.flip.on .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:grid;place-items:center;text-align:center;padding:1rem;font-size:1.7rem;font-weight:800;background:var(--card);border:2px solid var(--line);border-radius:14px;transition:background .3s,border-color .3s}
+.face small{display:block;font-weight:500;font-size:1rem;color:var(--mut);margin-top:.4rem}.face.b{transform:rotateY(180deg);font-size:1.3rem;background:var(--acs)}
+.gok .face{border-color:var(--ok);background:var(--oks)}.gno .face{border-color:var(--bad);background:var(--bads)}
+.big{font-size:3.5rem;line-height:1}.check{font-size:3.5rem;color:var(--ok);line-height:1}
+@media(prefers-reduced-motion:no-preference){.fade,.pop{animation:fd .4s ease both}.gok,.gno{animation:pp .5s}.bar div{animation:gr .8s}}
+@keyframes fd{from{opacity:0;transform:translateY(8px)}}@keyframes pp{50%{transform:scale(1.04)}}@keyframes gr{from{width:0}}
+.sh{margin:1.3rem 0 .1rem;font-size:1.05rem}</style></head><body>
+<header><div class="logo">SATForge</div><nav id="nav"></nav></header>
+<main id="app"></main>
+<script>
+let sd=7;const r=()=>(sd=(sd*1664525+1013904223)>>>0)/4294967296,ri=(a,b)=>a+Math.floor(r()*(b-a+1)),pk=a=>a[Math.floor(r()*a.length)],sh=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a},gcd=(a,b)=>b?gcd(b,a%b):a;
+const fm=n=>(+n.toFixed(2)).toLocaleString("en-US").replace("-","−"),near=(c,f=fm)=>[c+1,c-1,c+2,c-2,c+5,c-5,c*2,c/2,c+10,c-10].filter(v=>v!==c&&(c<0||v>0)&&v===Math.round(v*100)/100).map(f);
+const pi=(n,d=1)=>{const g=gcd(n,d);n/=g;d/=g;return(n==1?"":n)+"π"+(d>1?"/"+d:"")},fr=(n,d)=>{const g=gcd(n,d);return n/g+"/"+d/g},cm=v=>v.toLocaleString("en-US"),E=(q,c,w,e,t)=>({q,c,w,e,t});
+const G={};
+G["Linear equations"]=g=>{
+ if(g==1){const x=ri(2,20),a=ri(2,9),b=ri(1,20);return E(`If ${a}x + ${b} = ${a*x+b}, what is the value of x?`,fm(x),near(x),`Subtract ${b} from both sides: ${a}x = ${a*x}. Divide by ${a}: x = ${x}.`,`Desmos: graph y = ${a}x + ${b} and y = ${a*x+b}, then tap the intersection.`)}
+ if(g==2){const x=ri(2,15),a=ri(3,9),c=ri(1,a-1),b=ri(1,20);return E(`If ${a}x + ${b} = ${c}x + ${(a-c)*x+b}, what is the value of x?`,fm(x),near(x),`Subtract ${c}x and ${b} from both sides: ${a-c}x = ${(a-c)*x}. Divide by ${a-c}: x = ${x}.`,`Desmos: graph each side as its own line and tap the intersection.`)}
+ const x=ri(2,12),p=ri(3,8),q=ri(1,p-1),a=ri(1,9),b=ri(1,9),c=(p-q)*x+p*a+q*b;
+ return E(`If ${p}(x + ${a}) − ${q}(x − ${b}) = ${c}, what is the value of x?`,fm(x),near(x),`Distribute: ${p}x + ${p*a} − ${q}x + ${q*b} = ${c}. Combine like terms: ${p-q}x + ${p*a+q*b} = ${c}, so ${p-q}x = ${c-p*a-q*b} and x = ${x}.`,`Desmos: type the left side as one equation and ${c} as another.`)};
+G["Quadratics"]=g=>{
+ if(g==1){const a=ri(1,12),b=ri(1,12);if(a==b)return;const c=pk([a,-b]);return E(`Which of the following is a solution to (x − ${a})(x + ${b}) = 0?`,fm(c),[-a,b,a+b,-a-b,2*a].filter(v=>v!=a&&v!=-b).map(fm),`A product is 0 when a factor is 0. x − ${a} = 0 gives x = ${a}; x + ${b} = 0 gives x = −${b}.`)}
+ if(g==2){const a=ri(1,12),b=ri(1,12);if(a>b)return;const sm=r()<.5,c=sm?a+b:a*b;return E(`What is the ${sm?"sum":"product"} of the solutions to x² − ${a+b}x + ${a*b} = 0?`,fm(c),near(c),`Factor: (x − ${a})(x − ${b}) = 0, so the solutions are ${a} and ${b}. Their ${sm?"sum":"product"} is ${c}.`,`For x² + bx + c = 0, the solutions add to −b and multiply to c.`)}
+ if(r()<.5){const h=ri(2,30);return E(`For what value of k does x² + ${2*h}x + k = 0 have exactly one real solution?`,fm(h*h),near(h*h),`One solution means the discriminant is 0: ${2*h}² − 4k = 0, so k = ${h*h}.`)}
+ const h=ri(2,12),c=ri(1,60);return E(`What is the minimum value of y = x² − ${2*h}x + ${c}?`,fm(c-h*h),near(c-h*h),`The vertex is at x = ${h}. Substitute: ${h*h} − ${2*h*h} + ${c} = ${c-h*h}.`,`Desmos: graph it and tap the lowest point.`)};
+G["Percentages"]=g=>{
+ if(g==1){const p=pk([10,20,25,30,40,50,60,75]),n=ri(2,40)*20;return E(`What is ${p}% of ${n}?`,fm(p*n/100),near(p*n/100),`${p}% means ${p}/100, so ${p}/100 × ${n} = ${p*n/100}.`)}
+ if(g==2){if(r()<.5){const d=pk([10,15,20,25,30,40]),P=ri(2,30)*20,s=P*(100-d)/100;return E(`A jacket originally costs $${P}. It is on sale for ${d}% off. What is the sale price?`,"$"+fm(s),near(s,v=>"$"+fm(v)).concat(["$"+fm(P*d/100)]),`${d}% of ${P} is ${P*d/100}, and ${P} − ${P*d/100} = ${s}.`)}
+  const p=pk([10,20,25,40,50]),A=ri(2,30)*20,B=A*(100+p)/100;return E(`A store’s monthly sales rose from $${A} to $${B}. By what percent did sales increase?`,p+"%",[p+5,p-5,p+10,Math.round(100*(B-A)/B)].map(v=>v+"%"),`The increase is ${B-A}. ${B-A} ÷ ${A} = ${p/100}, which is ${p}%.`)}
+ if(r()<.6){const d=pk([10,15,20,25,30,40]),P=ri(2,30)*20,s=P*(100-d)/100;return E(`After a ${d}% discount, a jacket costs $${fm(s)}. What was the original price?`,"$"+P,[...near(P,v=>"$"+v),"$"+fm(s*(100+d)/100),"$"+fm(s+d)],`The sale price is ${100-d}% of the original: ${(100-d)/100} × P = ${s}, so P = ${s} ÷ ${(100-d)/100} = ${P}.`)}
+ const a=pk([10,20,25,50]),b=pk([10,20,25]),v=(100+a)*(100-b)/100;return E(`A price increases by ${a}% and then decreases by ${b}%. The final price is what percent of the original price?`,fm(v)+"%",[100+a-b,100,100-a+b,100+a].map(x=>fm(x)+"%"),`Multiply the factors: ${(100+a)/100} × ${(100-b)/100} = ${fm(v/100)}, which is ${fm(v)}% of the original.`)};
+const TR=[[3,4,5],[5,12,13],[8,15,17],[7,24,25],[20,21,29],[9,40,41]];
+G["Right triangles"]=g=>{
+ const[t0,t1,t2]=pk(TR),k=g==3?ri(2,12):ri(1,7);let a=t0*k,b=t1*k;const c=t2*k;if(r()<.5)[a,b]=[b,a];
+ if(g==1)return r()<.5?E(`A right triangle has legs of length ${a} and ${b}. What is the length of its hypotenuse?`,fm(c),near(c),`By the Pythagorean theorem, ${a}² + ${b}² = ${a*a+b*b}, and √${a*a+b*b} = ${c}.`,`Watch for Pythagorean triples such as 3-4-5 and 5-12-13, and their multiples.`):E(`A right triangle has a hypotenuse of length ${c} and one leg of length ${a}. What is the length of the other leg?`,fm(b),near(b),`${c}² − ${a}² = ${c*c-a*a}, and √${c*c-a*a} = ${b}.`);
+ if(g==2){const m=ri(0,2);
+  if(m==0)return E(`A right triangle has legs of length ${a} and ${b}. What is its area?`,fm(a*b/2),near(a*b/2),`Area = ½ × ${a} × ${b} = ${a*b/2}.`);
+  if(m==1)return E(`A right triangle has legs of length ${a} and ${b}. What is its perimeter?`,fm(a+b+c),near(a+b+c),`The hypotenuse is √(${a}² + ${b}²) = ${c}, so the perimeter is ${a} + ${b} + ${c} = ${a+b+c}.`);
+  return E(`In right triangle ABC, the right angle is at C, AC = ${a}, and BC = ${b}. What is tan A?`,fr(b,a),[fr(a,b),fr(b,c),fr(a,c)],`tan A = opposite ÷ adjacent = BC ÷ AC = ${b}/${a}, which is ${fr(b,a)} in simplest form.`)}
+ const m=ri(0,2);
+ if(m==0){const s=ri(2,60);return E(`An isosceles right triangle has a hypotenuse of length ${s}√2. What is its area?`,fm(s*s/2),near(s*s/2),`In a 45°-45°-90° triangle the hypotenuse is leg × √2, so each leg is ${s}. Area = ½ × ${s} × ${s} = ${fm(s*s/2)}.`)}
+ if(m==1){const x=ri(2,40);return E(`In a 30°-60°-90° triangle, the longer leg has length ${x}√3. What is the length of the hypotenuse?`,fm(2*x),near(2*x),`The sides are in the ratio x : x√3 : 2x, so the shorter leg is ${x} and the hypotenuse is ${2*x}.`)}
+ return E(`A rectangle has a diagonal of length ${c} and one side of length ${a}. What is the area of the rectangle?`,fm(a*b),near(a*b),`The other side is √(${c}² − ${a}²) = ${b}. Area = ${a} × ${b} = ${a*b}.`)};
+G["Systems of equations"]=g=>{
+ if(g==1){const x=ri(3,20),y=ri(1,x-1),ax=r()<.5;return E(`If x + y = ${x+y} and x − y = ${x-y}, what is the value of ${ax?"x":"y"}?`,fm(ax?x:y),near(ax?x:y),`Add the equations: 2x = ${2*x}, so x = ${x}. Then y = ${x+y} − ${x} = ${y}.`,`Desmos: graph both equations and tap the intersection.`)}
+ if(g==2){const x=ri(1,9),y=ri(1,9),a=ri(1,5),b=ri(1,5),d=ri(1,5),e=ri(1,5);if(a*e==b*d)return;return E(`If ${a}x + ${b}y = ${a*x+b*y} and ${d}x + ${e}y = ${d*x+e*y}, what is the value of x + y?`,fm(x+y),near(x+y),`Solve with elimination or substitution to get x = ${x} and y = ${y}. Then x + y = ${x+y}.`,`Desmos: enter both equations and read the intersection point.`)}
+ const a=ri(2,9),b=ri(2,9),c=ri(2,20),m=ri(2,6),inf=r()<.5,n=inf?m*c:m*c+ri(1,9);
+ return E(`Consider ${a}x + ${b}y = ${c} and ${m*a}x + ky = ${n}. For what value of k does the system have ${inf?"infinitely many solutions":"no solution"}?`,fm(m*b),near(m*b),`The x-coefficient is multiplied by ${m}, so the y-coefficient must be too: k = ${m}·${b} = ${m*b}. ${inf?`The constants also scale by ${m}, so the lines are identical.`:`The constant does not scale by ${m}, so the lines are parallel.`}`)};
+G["Exponential growth"]=g=>{
+ if(g==1){const P=ri(2,20)*50,t=ri(1,5),n=ri(2,6),c=P*2**n;return E(`A population of ${cm(P)} bacteria doubles every ${t} year${t>1?"s":""}. How many bacteria are there after ${n*t} years?`,cm(c),near(c,cm).concat([cm(P*2*n)]),`${n*t} years is ${n} doubling periods, so ${cm(P)} × 2^${n} = ${cm(c)}.`,`Desmos: graph y = ${P}·2^(x/${t}) and evaluate at x = ${n*t}.`)}
+ if(g==2){const rr=pk([10,20,50]),n=ri(2,3),P=ri(1,10)*1000,c=Math.round(P*(100+rr)**n/100**n);return E(`An investment of $${cm(P)} grows by ${rr}% each year. What is its value after ${n} years?`,"$"+cm(c),[P*(1+rr*n/100),P*(100+rr)**(n-1)/100**(n-1),c+P/10,P*(1+rr/100)*n].map(v=>"$"+cm(Math.round(v))),`Each year multiplies the value by ${(100+rr)/100}: ${cm(P)} × ${(100+rr)/100}^${n} = $${cm(c)}.`,`Desmos: graph y = ${P}·${(100+rr)/100}^x and evaluate at x = ${n}.`)}
+ if(r()<.5){const b=ri(2,5),A=ri(2,9);return E(`An exponential function f(t) = A·b^t has f(1) = ${A*b} and f(3) = ${A*b**3}. What is the value of b?`,fm(b),near(b),`f(3) ÷ f(1) = b² = ${b*b}, so b = ${b}.`)}
+ const n=ri(2,5),h=ri(2,12),M=ri(1,10)*5*2**n,c=M/2**n;return E(`A radioactive sample has a half-life of ${h} years and a mass of ${cm(M)} grams today. What will its mass be after ${n*h} years?`,cm(c)+" g",[...near(c,v=>cm(v)+" g"),cm(M/(2*n))+" g"],`${n*h} years is ${n} half-lives, so the mass is ${cm(M)} ÷ 2^${n} = ${cm(c)} grams.`)};
+G["Circles"]=g=>{
+ if(g==1){const rr=ri(2,60),m=ri(0,2);
+  if(m==0)return E(`A circle has a radius of ${rr}. What is its area?`,pi(rr*rr),[2*rr,rr*rr*2,rr,rr*rr*4].map(v=>pi(v)),`Area = πr² = π(${rr})² = ${rr*rr}π.`);
+  if(m==1)return E(`A circle has a radius of ${rr}. What is its circumference?`,pi(2*rr),[rr,rr*rr,4*rr,2*rr*rr].map(v=>pi(v)),`Circumference = 2πr = 2π(${rr}) = ${2*rr}π.`);
+  return E(`A circle has a diameter of ${2*rr}. What is its circumference?`,pi(2*rr),[rr,rr*rr,4*rr,4*rr*rr].map(v=>pi(v)),`Circumference = πd = ${2*rr}π.`)}
+ if(g==2){const rr=ri(2,60);if(r()<.5)return E(`A circle has an area of ${rr*rr}π. What is the length of its diameter?`,fm(2*rr),near(2*rr).concat([fm(rr*rr)]),`πr² = ${rr*rr}π gives r = ${rr}, so the diameter is ${2*rr}.`);return E(`A circle has a circumference of ${2*rr}π. What is its radius?`,fm(rr),near(rr),`2πr = ${2*rr}π gives r = ${rr}.`)}
+ const m=ri(0,2);
+ if(m<2){const th=pk([30,45,60,90,120,135,150,240,270]),rr=ri(3,20),arc=m==0,c=arc?pi(th*rr,180):pi(th*rr*rr,360);return E(`In a circle of radius ${rr}, a central angle measures ${th}°. What is the ${arc?"length of the arc":"area of the sector"} that the angle ${arc?"intercepts":"cuts off"}?`,c,arc?[pi(th*rr,360),pi(th*rr*2,180),pi(th*rr,90),pi(th*rr*rr,360)]:[pi(th*rr,180),pi(th*rr*rr,180),pi(th*rr*rr*2,360),pi(th*rr*rr,720)],arc?`The arc is ${th}/360 of the circumference: (${th}/360)(2π·${rr}) = ${c}.`:`The sector is ${th}/360 of the area: (${th}/360)(π·${rr}²) = ${c}.`)}
+ const h=pk([-4,-3,-2,2,3,4]),k=pk([-4,-3,-2,2,3,4]),rr=ri(6,13),D=rr*rr-h*h-k*k,sg=(co,v)=>`${co<0?"−":"+"} ${Math.abs(co)}${v}`;
+ return E(`The equation x² + y² ${sg(-2*h,"x")} ${sg(-2*k,"y")} = ${D} defines a circle in the xy-plane. What is the radius of the circle?`,fm(rr),near(rr).concat([fm(D)]),`Complete the square: (x ${h<0?"+":"−"} ${Math.abs(h)})² + (y ${k<0?"+":"−"} ${Math.abs(k)})² = ${D} + ${h*h} + ${k*k} = ${rr*rr}, so r = ${rr}.`)};
+const NM=[["Dana","she","her","her"],["Marcus","he","him","his"],["Priya","she","her","her"],["Leo","he","him","his"],["Amara","she","her","her"],["Jun","he","him","his"],["Elena","she","her","her"],["Omar","he","him","his"]];
+const WC=[[["generous",["gave away half {p} savings to the shelter","shared {p} lunch with anyone who forgot theirs"]],["modest",["never bragged about {p} many awards","downplayed {p} success whenever it came up"]],["cautious",["tested the ice before taking a single step","checked both directions twice before crossing"]],["eager",["was first in line and could hardly wait to begin","volunteered before the question was even finished"]],["reluctant",["delayed leaving as long as {s} could","hesitated a long time before agreeing to speak"]],["honest",["always told the truth, even when it was awkward","returned the extra change the cashier gave by mistake"]],["curious",["asked questions about everything on the tour","took apart the radio to see how it worked"]],["patient",["waited calmly through the long delays","explained the steps again without a hint of annoyance"]],["brave",["ran into the building to help a stranger","spoke up even though everyone disagreed"]],["thrifty",["compared prices at three stores before buying anything","saved part of every paycheck"]]],
+[["meticulous",["checked every figure three times","labeled each sample with the exact date and time"]],["candid",["told the committee exactly what {s} thought","gave direct, honest feedback even when it stung"]],["pragmatic",["chose the plan that would actually work over the one that sounded ideal","focused on practical results rather than theory"]],["diligent",["worked steadily every day until the project was done","never missed a deadline in ten years"]],["prudent",["waited for more data before investing","kept a savings cushion for emergencies"]],["benevolent",["funded scholarships for students who could not pay","gave aid to neighbors out of pure goodwill"]],["gregarious",["chatted with everyone at the party","joined every club and made friends easily"]],["skeptical",["asked for proof before believing any claim","doubted the results until they were repeated"]],["affable",["greeted every visitor with a warm smile","was easy and pleasant to talk to"]],["methodical",["solved each problem by following the same orderly steps","organized the files by date, then by topic"]]],
+[["capricious",["changed {p} decisions without any clear reason","switched plans from hour to hour"]],["austere",["lived in a bare room with almost no comforts","avoided luxury of every kind"]],["ostentatious",["threw lavish parties meant to show off {p} wealth","wore showy jewelry to draw attention"]],["reticent",["rarely spoke about {p} own past","stayed silent in nearly every meeting"]],["zealous",["pursued the cause with fierce, passionate devotion","campaigned for it day and night"]],["impartial",["favored neither side in the dispute","treated both teams exactly the same"]],["eloquent",["moved the crowd with graceful, powerful language","spoke so fluently that listeners were captivated"]],["scrupulous",["followed every rule and avoided even small dishonesty","double-checked that every source was credited"]],["stoic",["endured the pain without complaint","faced the setback with calm acceptance"]],["magnanimous",["forgave the rival and shared the credit generously","treated the defeated team with great generosity"]]]];
+G["Words in context"]=g=>{const T=WC[g-1],[w,cl]=pk(T),[n,s,o,p]=pk(NM),vp=pk(cl).replace(/\{s\}/g,s).replace(/\{p\}/g,p),f=ri(0,2);
+ const t=f==0?`${n} ${vp}, which suggests ${s} is ______.`:f==1?`Because ${n} ${vp}, colleagues described ${o} as ______.`:`${n} ${vp}; ${s} is, in other words, remarkably ______.`;
+ return{p:t,q:"Which choice completes the text with the most logical and precise word?",c:w,w:T.map(x=>x[0]).filter(x=>x!=w),e:`The context clue is what ${n} did: ${n} ${vp}. Only “${w}” describes a person who acts that way.`}};
+const RW=[[["is","are","being","to be"],["on display in the lobby","ready for inspection","stored in the basement","listed on the website"]],[["has","have","having","to have"],["been repaired","been updated recently","become popular","arrived early"]],[["seems","seem","seeming","to seem"],["unusually valuable","important to the project","out of place","too expensive"]],[["needs","need","needing","to need"],["careful handling","to be replaced soon","more space","a new label"]]];
+const H=["collection","list","box","stack","bouquet","set","series","key","author","leader","editor","price","size","label","photograph","manager","teacher","captain","report","member"],O=["rare coins","old letters","red roses","new students","wooden chairs","city maps","school records","glass bottles","summer tickets","safety rules"],P=["paintings","cabinets","tickets","letters","photographs","keys","teachers","captains","reports","members"],PL=["hallway","office","library","museum","locker","storage room","front office","lab"];
+G["Subject-verb agreement"]=g=>{const[v,ps]=pk(RW),pr=pk(ps),h=pk(H),o=pk(O),p=pk(P),pl=pk(PL),k=g==1?ri(0,1):g==2?2:ri(3,6);let s,si,why;
+ if(k==0){s=`The ${h}`;si=1;why=`The subject “${h}” is singular`}
+ else if(k==1){s=`The ${p}`;si=0;why=`The subject “${p}” is plural`}
+ else if(k==2){if(r()<.5){s=`The ${h} of the ${o}`;si=1;why=`The subject is “${h}” (singular), not “${o}”`}else{s=`The ${p} in the ${pl}`;si=0;why=`The subject is “${p}” (plural), not “${pl}”`}}
+ else if(k==3){const a=pk(P),b=pk(H);if(r()<.5){s=`Neither the ${a} nor the ${b}`;si=1;why=`With “neither…nor,” the verb agrees with the closer subject, “${b}” (singular)`}else{s=`Neither the ${b} nor the ${a}`;si=0;why=`With “neither…nor,” the verb agrees with the closer subject, “${a}” (plural)`}}
+ else if(k==4){s=`Each of the ${p}`;si=1;why=`“Each” is the subject and it is singular`}
+ else if(k==5){s=`One of the ${p}`;si=1;why=`“One” is the subject and it is singular`}
+ else{s=`The ${h}, along with the ${o},`;si=1;why=`The subject is “${h}”; “along with…” does not make it plural`}
+ return{p:`${s} ______ ${pr}.`,q:"Which choice completes the text so that it conforms to the conventions of Standard English?",c:v[si?0:1],w:[v[si?1:0],v[2],v[3]],e:`${why}, so the verb must be “${v[si?0:1]}”.`}};
+const REL=[["However,","Nevertheless,","Still,","Even so,"],["As a result,","Consequently,","Therefore,","Thus,"],["Moreover,","Furthermore,","In addition,","Additionally,"],["For example,","For instance,","Specifically,","In particular,"]],RN=["contrasts with","is the result of","adds to","gives an example of"];
+const TP=[["{N} studied for weeks.|{s} still struggled on the first exam","{N} expected the trip to be expensive.|{s} found a flight for half the usual price","{N} is an excellent swimmer.|{s} has never entered a competition","{N} planned to leave early.|{p} car would not start","{N} enjoys cooking for friends.|{s} rarely cooks on weekdays","{N} was confident before the audition.|{s} felt nervous once on stage","{N} wanted to buy the jacket.|it was far outside {p} budget","{N} read the entire manual.|{s} could not fix the printer"],
+["{N} trained for months.|{s} finished the race in under four hours","{N} forgot to water the plants.|they wilted by the end of the week","{N} saved part of every paycheck.|{s} could afford a down payment on a house","{N} practiced the speech nightly.|{s} delivered it without notes","{N} left the window open during the storm.|the floor was soaked by morning","{N} missed the bus.|{s} arrived thirty minutes late","{N} revised the essay three times.|the final draft was far clearer","{N} volunteered every weekend.|{s} won the community service award"],
+["{N} is a skilled programmer.|{s} designs clean, attractive interfaces","{N} writes the sports column for the school paper.|{s} edits the arts section","{N} speaks fluent Spanish.|{s} is learning Japanese","{N} runs a bakery that sells fresh bread daily.|it hosts a baking class on Saturdays","{N} volunteers at the food bank.|{s} tutors children after school","{N} found the research topic fascinating.|{s} saw its practical value","{N} designed the poster.|{s} printed and hung it around campus","{N} cleaned the entire kitchen.|{s} organized the pantry shelves"],
+["{N} has many creative hobbies.|{s} paints landscapes and builds model ships","{N} enjoys outdoor sports.|{s} plays tennis and goes rock climbing every week","{N} keeps a varied garden.|{s} grows tomatoes, beans, and several kinds of herbs","{N} reads widely.|{s} finished a history of Rome and two science-fiction novels this month","{N} stays active in the community.|{s} coaches a youth soccer team and sings in the choir","{N} has traveled to many countries.|{s} has visited Peru, Kenya, and Norway","{N} uses several study techniques.|{s} makes flashcards and teaches the material to a friend","{N} is careful with money.|{s} brings lunch from home and tracks every purchase"]];
+G["Transitions"]=g=>{const i=g==1?ri(0,1):ri(0,3),[n,s,o,p]=pk(NM),[a,b]=pk(TP[i]).replace(/\{N\}/g,n).replace(/\{s\}/g,s).replace(/\{p\}/g,p).split("|"),c=pk(REL[i]);
+ return{p:`${a} ______ ${b}.`,q:"Which choice completes the text with the most logical transition?",c,w:REL.map((x,j)=>j==i?0:pk(x)).filter(Boolean),e:`The second sentence ${RN[i]} the first, so “${c}” fits. The other choices signal a different relationship.`}};
+const CT=[["Community gardens","provide fresh vegetables",["cool nearby streets","absorb rainwater","give neighbors a reason to meet","attract pollinating insects","reduce food waste"]],["School libraries","store books",["offer quiet study space","teach research skills","host student clubs","provide free internet access","support reading for fun"]],["Bicycle lanes","help cyclists travel",["reduce traffic congestion","cut air pollution","lower noise levels","make streets safer for walkers","increase business near the lane"]],["Public parks","offer open green space",["lower summer temperatures","give children places to play","host community festivals","protect local wildlife","encourage exercise"]],["Museums","display historical objects",["train young researchers","bring tourists to the city","host school field trips","preserve fragile artifacts","spark public debate"]],["Urban trees","provide shade",["filter dust from the air","lower energy bills","absorb heavy rain","shelter birds","raise nearby property values"]],["Team sports","build athletic skill",["teach cooperation","improve sleep","build friendships","encourage discipline","reduce stress"]],["Community colleges","offer affordable classes",["train workers for local industries","help students transfer to universities","host evening programs for adults","partner with employers","serve as cultural centers"]],["Food banks","distribute groceries",["connect volunteers with neighbors","reduce food waste","point families to other services","teach basic nutrition","draw donations from local farms"]],["Night schools","teach evening classes",["help adults finish diplomas","fill skilled jobs at local employers","strengthen neighborhood ties","support language learners","give parents a place to study"]]];
+G["Central ideas"]=g=>{const[S,pm,bs]=pk(CT),b=sh(bs).slice(0,3),s=S.toLowerCase(),l=`${b[0]}, ${b[1]}, and ${b[2]}`;
+ const p=g==1?`${S} do more than ${pm}. Studies show that they ${l}.`:g==2?`${S} are usually valued because they ${pm}. Researchers, however, have found that they also ${l}.`:`${S} ${pm}. Critics note that they require steady funding. Even so, studies find that they ${l}.`;
+ return{p,q:"Which choice best states the main idea of the text?",c:g==3?`${S} are worth supporting despite their costs because they bring several benefits.`:`${S} benefit communities in several ways beyond their main purpose.`,w:[`The only real purpose of ${s} is to ${pm}.`,`${S} are too costly for most communities to support.`,`Researchers disagree about whether ${s} work as intended.`],e:g==3?`The text admits a cost but stresses that the benefits (${l}) justify support.`:`The text names a main purpose, then stresses additional benefits (${l}).`}};
+const IT=[["bean plants","daily sunlight","8 hours of sunlight","3 hours of sunlight","height","cm",1],["students","nightly sleep","8 hours of sleep","5 hours of sleep","test score","points",1],["runners","weekly training","six days of training","two days of training","race-time improvement","seconds",1],["tomato plants","fertilizer","a full dose of fertilizer","no fertilizer","fruit yield","kg",1],["students","evening screen time","three hours of screen time","thirty minutes of screen time","sleep-quality score","points",0],["office workers","daily meetings","five hours of meetings","one hour of meetings","focus rating","points",0]];
+G["Inferences"]=g=>{const[sj,f,hi,lo,out,u,pos]=pk(IT),A=ri(20,40),B=ri(5,19),[h,l]=pos?[A,B]:[B,A];
+ const p=`Researchers compared ${sj} with different levels of ${f}. Those with ${hi} had an average ${out} of ${h} ${u}, while those with ${lo} had an average ${out} of ${l} ${u}.${g==3?" The groups were not randomly assigned.":""} Based on these results, it is reasonable to conclude that ______`;
+ const c=g==3?`the results show an association between ${f} and ${out} but do not prove that ${f} caused the difference.`:`more ${f} was associated with a ${pos?"higher":"lower"} ${out} in this comparison.`;
+ return{p,q:"Which choice most logically completes the text?",c,w:g==3?[`${f} definitely caused the difference in ${out}.`,`${f} has no relationship to ${out}.`,`the results would be identical in every population of ${sj}.`]:[`${f} has no effect on ${out}.`,`a ${pos?"higher":"lower"} ${out} causes ${sj} to have more ${f}.`,`${f} is the only factor that affects ${out} in any group of ${sj}.`],e:g==3?`The groups were not randomly assigned, so the data can show an association but not prove cause.`:`The group with more ${f} had a ${pos?"higher":"lower"} average ${out}, so the safest conclusion is an association, not an absolute rule.`}};
+const SUBS=[["Linear equations","Math"],["Quadratics","Math"],["Percentages","Math"],["Right triangles","Math"],["Systems of equations","Math"],["Exponential growth","Math"],["Circles","Math"],["Words in context","Reading & Writing"],["Transitions","Reading & Writing"],["Subject-verb agreement","Reading & Writing"],["Inferences","Reading & Writing"],["Central ideas","Reading & Writing"]];
+let nid=1000;const Q=[];
+function make(sub,dom,lv,n,seen){const out=[];for(let t=0;out.length<n&&t<9000;t++){const x=G[sub](lv);if(!x)continue;const key=(x.p||"")+x.q;if(seen.has(key))continue;const w=[...new Set(x.w)].filter(v=>v!==x.c);if(w.length<3)continue;seen.add(key);const o=sh([x.c,...sh(w).slice(0,3)]);out.push({id:++nid,d:dom,s:sub,lv,q:x.q,p:x.p,o,a:o.indexOf(x.c),e:x.e,t:x.t})}return out}
+const SEEN={};SUBS.forEach(([s,d])=>{const seen=SEEN[s]=new Set();[[1,80],[2,50],[3,30]].forEach(([lv,n])=>Q.push(...make(s,d,lv,n,seen)))});
+const QS=sh(Q),QM=new Map(Q.map(q=>[q.id,q])),LN=["","Easy","Medium","Hard"];
+const DQ=[];SUBS.forEach(([s,d])=>[[1,5],[2,5],[3,5]].forEach(([lv,n])=>DQ.push(...make(s,d,lv,n,SEEN[s]))));DQ.forEach(q=>QM.set(q.id,q));
+let S={log:[],sess:{},daily:null,streak:0,last:"",known:[],vd:null,tr:{dom:"All",sk:"All",lv:0,pos:{}},dg:null,dgr:null};
+try{Object.assign(S,JSON.parse(localStorage.getItem("sf2")||"{}"))}catch(e){}
+S.log=S.log.filter(l=>QM.has(l.id));for(const k in S.sess)if(!QM.has(+k))delete S.sess[k];
+if(S.dg&&S.dg.ord.some(id=>!QM.has(id)))S.dg=null;if(S.dgr&&S.dgr.ord.some(id=>!QM.has(id)))S.dgr=null;S.tr=S.tr||{};S.tr.pos=S.tr.pos||{};
+const save=()=>{try{localStorage.setItem("sf2",JSON.stringify(S))}catch(e){}};
+const W=`ramified|divided into branches or parts
+innervated|supplied with nerves
+repudiated|rejected or refused to accept
+ousted|forced out of a position
+mendacious|lying; dishonest
+inane|silly or meaningless
+evanescent|quickly fading or vanishing
+fractious|irritable, quarrelsome, hard to control
+sacrosanct|too important or holy to be criticized or violated
+benign|gentle or harmless
+animate|alive; to bring to life
+inconspicuous|not easily noticed
+abominable|extremely bad or hateful
+symposium|a conference or meeting to discuss a topic
+brusque|abrupt and rude in manner
+complaisant|eager to please
+complacent|self-satisfied and unaware of danger
+eloquence|fluent, persuasive speech or writing
+divulged|revealed something that was secret
+procured|obtained
+castigated|criticized harshly
+exacerbated|made worse
+vindicated|proved right or cleared of blame
+didactic|intended to teach
+disparage|speak of as having little value
+surmise|suppose without firm evidence
+plodder|someone who works or moves slowly and steadily
+fortitude|courage and strength in hardship
+continuum|a continuous sequence with no clear breaks
+constitution|a person’s physical makeup or health; a founding set of laws
+improvised|made up on the spot
+emanate|come out from a source
+cultivate|develop or nurture
+transcend|rise above or go beyond
+welcome|receive gladly
+assess|evaluate
+lavish|(adj.) rich or extravagant; (v.) give generously
+deficiency|a lack of something needed
+intrinsic|belonging naturally to something
+elusive|hard to catch or define
+docile|easily taught or controlled
+resolute|firmly determined
+capricious|impulsive and unpredictable
+daunting|intimidating
+holistic|considering the whole rather than just the parts
+discern|perceive or figure out
+mitigate|make less severe (you can’t mitigate good things)
+aberration|a departure from what is normal
+alleviate|ease or reduce
+ambiguous|open to more than one meaning
+ambivalent|having mixed feelings
+arduous|requiring great effort
+austere|plain and severe
+belligerent|hostile and aggressive
+benevolent|kind and well-meaning
+candid|honest and direct
+cogent|clear and convincing
+corroborate|confirm with evidence
+diligent|hardworking and careful
+enigma|a puzzling person or thing
+ephemeral|lasting a very short time
+frugal|careful with money
+gregarious|sociable
+hinder|get in the way of
+impartial|fair and unbiased
+indifferent|having no interest
+innovative|introducing new ideas
+lucid|clearly expressed
+meticulous|showing great attention to detail
+obsolete|no longer in use
+ostentatious|showy, meant to impress
+pervasive|spreading throughout
+pragmatic|practical rather than idealistic
+prudent|careful and sensible
+reticent|reserved, slow to speak
+scrutinize|examine closely
+skeptical|doubtful
+substantiate|support with evidence
+tenuous|weak or slight
+ubiquitous|found everywhere
+volatile|likely to change quickly
+zealous|passionately eager
+abstain|choose not to do something
+acquiesce|accept without protest
+acrimony|bitter, harsh feeling
+adversity|hardship
+advocate|publicly support
+aesthetic|related to beauty
+affluent|wealthy
+altruistic|selflessly concerned for others
+amiable|friendly and pleasant
+anachronism|something out of its proper time
+analogous|comparable in some way
+anomaly|something unusual or unexpected
+antagonize|provoke hostility
+apathy|lack of interest or concern
+appease|calm by giving in
+arbitrary|based on whim, not reason
+ardent|passionate
+astute|sharp and clever
+audacious|boldly daring
+augment|make greater
+banal|boring from being too common
+bolster|support or strengthen
+bureaucracy|a rigid system of official rules
+cacophony|a harsh jumble of sounds
+censure|formal criticism
+circumspect|careful and cautious
+coalesce|come together as one
+coerce|force someone to act
+coherent|logical and consistent
+colloquial|informal, conversational
+conciliatory|aimed at making peace
+condone|accept or overlook wrongdoing
+conjecture|a guess based on incomplete information
+connoisseur|an expert judge of art, food, or wine
+contentious|likely to cause argument
+copious|plentiful
+credulous|too ready to believe
+cursory|quick and not thorough
+debilitate|weaken
+deference|polite respect
+deleterious|harmful
+denounce|publicly condemn
+deride|mock
+derivative|copied from something else
+despot|a ruler with absolute power
+detrimental|causing harm
+diatribe|a bitter verbal attack
+digress|stray from the main topic
+discord|disagreement
+discrepancy|a difference between things that should match
+disdain|scorn
+disparate|fundamentally different
+dispel|drive away
+dissent|disagreement
+diverge|split apart
+dogmatic|stubbornly insisting one is right
+dubious|doubtful
+eccentric|oddly unconventional
+efficacy|ability to produce a result
+egregious|outrageously bad
+elicit|draw out
+eminent|famous and respected
+empirical|based on observation
+emulate|imitate to match or surpass
+equivocal|ambiguous; open to interpretation
+erratic|unpredictable
+erroneous|wrong
+esoteric|understood by only a few
+exemplary|serving as a model
+exhaustive|complete and thorough
+exonerate|clear of blame
+expedite|speed up
+explicit|clearly stated
+extraneous|not relevant
+facilitate|make easier
+fallacy|a mistaken belief
+feasible|possible to do
+fervent|intensely emotional
+flagrant|obviously shocking
+fluctuate|rise and fall irregularly
+foster|encourage growth
+futile|pointless
+garrulous|talkative
+haphazard|lacking order
+haughty|arrogantly proud
+hypothesis|a proposed explanation to be tested
+idiosyncratic|peculiar to one person
+impetuous|acting without thinking
+implicit|implied but not stated
+impervious|not affected by
+inadvertent|unintentional
+incessant|never stopping
+incongruous|out of place
+indignant|angry at unfairness
+inevitable|certain to happen
+infer|conclude from evidence
+ingenuous|innocent and trusting
+innate|inborn
+insidious|sneaky and slowly harmful
+integral|essential
+inundate|overwhelm with a flood
+laconic|using few words
+lament|express grief
+legitimate|lawful or valid
+lethargic|sluggish
+malleable|easily shaped or influenced
+meager|small in amount
+mundane|ordinary, everyday
+nonchalant|casually unconcerned
+nostalgia|sentimental longing for the past
+notorious|famous for something bad
+novice|a beginner
+nuance|a subtle difference
+oblivious|unaware
+obscure|unclear or little known
+obstinate|stubborn
+ominous|threatening
+opaque|not transparent
+paradox|a seemingly contradictory statement that may be true
+partisan|strongly loyal to one side
+paucity|scarcity
+perfunctory|done with little effort
+peripheral|on the edge
+pernicious|deeply harmful
+perpetuate|cause to continue
+placid|calm
+plausible|believable
+precarious|unsteady and dangerous
+precedent|an earlier example that guides later action
+presumptuous|overstepping boundaries
+proliferate|increase rapidly
+prolific|producing much
+propensity|a natural tendency
+quell|put an end to
+rebuke|sharply criticize
+recant|take back a statement
+redundant|unnecessarily repeated
+refute|prove wrong
+relinquish|give up
+remorse|deep regret
+renounce|formally give up
+replete|well supplied
+reprehensible|deserving blame
+resilient|able to recover quickly
+reverence|deep respect
+rhetoric|persuasive language
+rigorous|strict and thorough
+sagacious|wise
+scrupulous|careful about doing right
+sporadic|occasional
+spurious|false or fake
+squander|waste
+stagnant|not moving or changing
+staunch|firmly loyal
+stringent|strict
+subtle|delicate, not obvious
+superfluous|more than needed
+supplant|take the place of
+surreptitious|secret
+tangible|able to be touched or clearly real
+tedious|boring and long
+temperate|moderate
+thwart|prevent
+trivial|of little importance
+undermine|weaken gradually
+unprecedented|never done before
+vacillate|go back and forth
+venerate|deeply respect
+verbose|using too many words
+viable|workable
+vindictive|seeking revenge
+warrant|justify
+wary|cautious
+whimsical|playful and unpredictable
+wistful|sadly longing`.trim().split("\n").map(x=>x.split("|"));
+const $=h=>{const t=document.createElement("template");t.innerHTML=h.trim();return t.content.firstChild};
+const today=()=>new Date().toLocaleDateString("en-CA"),L="ABCD",qm=id=>QM.get(id);
+let IV;
+function qcard(q,cb,o={}){
+ const el=$(`<div class="card q"><div class="meta">${q.d} · ${q.s} · ${LN[q.lv]}</div>${q.p?`<div class="pass">${q.p}</div>`:""}<div class="st">${q.q}</div></div>`);
+ let fin=false;
+ const bt=q.o.map((t,i)=>{const b=$(`<button class="opt"><i>${L[i]}</i><span>${t}</span></button>`);
+  b.oncontextmenu=e=>{e.preventDefault();b.classList.toggle("x")};
+  b.onclick=()=>{if(o.test){bt.forEach((x,j)=>x.classList.toggle("sel",j===i));cb(null,i)}else{const ok=pick(i);cb(ok,i)}};el.append(b);return b});
+ function pick(i){if(fin)return;fin=true;const ok=i===q.a;bt[q.a].classList.add("ok");if(i>=0&&!ok)bt[i].classList.add("no");
+  const full=!ok||!o.brief,brief=q.e.split(/(?<=\.)\s/)[0];
+  el.append($(`<div class="exp"><p><b>${ok?"Correct.":i<0?"Not answered.":"Not quite."}</b> ${i>=0&&!ok?`You picked ${L[i]}. `:""}The answer is <b>${L[q.a]}: ${q.o[q.a]}</b>.</p><p>${full?(ok?"":"<b>Let’s break it down:</b> ")+q.e:brief}</p>${full&&q.t?`<p><b>Tip:</b> ${q.t}</p>`:""}</div>`));return ok}
+ if(o.pre!=null){o.test?bt.forEach((x,j)=>x.classList.toggle("sel",j===o.pre)):pick(o.pre)}
+ return el}
+function by(k){const o={};Q.forEach(q=>o[q[k]]=o[q[k]]||{n:0,c:0});S.log.forEach(l=>{const v=o[qm(l.id)[k]];v.n++;if(l.ok)v.c++});return o}
+function bars(o){return Object.entries(o).map(([k,v])=>{const p=v.n?Math.round(100*v.c/v.n):0;return `<div class="row"><span>${k}</span><div class="bar"><div style="width:${p}%"></div></div><span>${v.n?p+"%":"–"}</span></div>`}).join("")}
+function countUp(el,to){let v=0;const t=setInterval(()=>{el.textContent=v;if(v++>=to)clearInterval(t)},to?600/to:0)}
+const R={};
+R.home=a=>{
+ let h=0;for(const c of today())h=(h*31+c.charCodeAt(0))%997;
+ if(!S.daily||S.daily.date!==today()||!S.daily.a)S.daily={date:today(),a:{}};
+ const DM=["Math","Reading & Writing"],SL=[];DM.forEach((d,di)=>[1,2,3].forEach(lv=>{const pool=Q.filter(q=>q.d===d&&q.lv===lv),k=SL.length;SL.push({k,di,lv,q:pool[(h+k*131)%pool.length],lb:`${d} · ${LN[lv]}`})}));
+ a.append($(`<div><h1>Practice a little every day.</h1><p class="meta" style="max-width:58ch">Free, self-guided SAT practice: six daily questions, ${cm(Q.length)} training questions across 12 skills, ${W.length} vocab words, and a timed diagnostic. Progress saves in this browser.</p></div>`));
+ const stc=$(`<div></div>`),hd=$(`<h2></h2>`),dc=$(`<div></div>`),skc=$(`<div></div>`),stacks=[];
+ const ds=()=>{const n=S.log.length,c=S.log.filter(l=>l.ok).length;stc.innerHTML=`<div class="stats"><div class="card"><b>${n}</b><span>questions answered</span></div><div class="card"><b>${n?Math.round(100*c/n):0}%</b><span>accuracy</span></div><div class="card"><b>${S.streak}</b><span>day streak</span></div></div>`;skc.innerHTML=`<h2>Accuracy by skill</h2><div class="card">${bars(by("s"))}</div>`;
+  const dn=Object.keys(S.daily.a).length;hd.textContent=dn==6&&Object.values(S.daily.a).every(v=>!v.open)?"Today’s questions: all done. A new set arrives tomorrow.":`Today’s questions (${dn}/6 answered)`;stacks.forEach(s=>s.upd())};
+ const slot=(x,box)=>{box.innerHTML="";const d=S.daily.a[x.k],q=x.q;
+  const fin=()=>{const g=$(`<button class="p">Done for today</button>`);g.onclick=()=>{S.daily.a[x.k].open=0;save();slot(x,box);ds()};box.append(g)};
+  if(d&&!d.open){const b=$(`<div class="card fade"><p><b class="${d.ok?"gt":"rt"}">${d.ok?"✔ Nailed it.":"✘ Missed."}</b> <span class="meta">${x.lb}</span></p></div>`),t=$(`<button>Show explanation</button>`);
+   t.onclick=()=>{t.remove();b.append($(`<div class="exp"><p><b>${L[q.a]}: ${q.o[q.a]}.</b> ${q.e}</p></div>`))};b.append(t);box.append(b);return}
+  box.append(qcard(q,(ok,i)=>{S.daily.a[x.k]={i,ok,open:1};S.log.push({id:q.id,ok});const y=new Date(Date.now()-864e5).toLocaleDateString("en-CA");if(S.last!==today()){S.streak=S.last===y?S.streak+1:1;S.last=today()}save();ds();fin()},{brief:1,pre:d?d.i:undefined}));
+  if(d)fin()};
+ DM.forEach((d,di)=>{const w=$(`<div><h3 class="sh">${d==="Math"?"Math":"English (Reading & Writing)"}</h3><div class="chips"></div><div></div></div>`),bar=w.children[1],box=w.children[2],xs=SL.filter(x=>x.di===di);
+  let cur=xs.find(x=>!S.daily.a[x.k]||S.daily.a[x.k].open)||xs[0];
+  const upd=()=>{bar.innerHTML="";xs.forEach(x=>{const e=S.daily.a[x.k],b=$(`<button class="${x===cur?"on":""}">${LN[x.lv]}${e?(e.ok?" ✔":" ✘"):""}</button>`);b.onclick=()=>{cur=x;upd();slot(x,box)};bar.append(b)})};
+  stacks.push({upd});upd();slot(cur,box);dc.append(w)});
+ a.append(stc,hd,dc,skc);ds()};
+const buildDiag=()=>{const U=new Set(S.dused||[]),ids=[],sb=x=>SUBS.filter(s=>s[1]===x).map(s=>s[0]),rn=()=>Math.random()-.5;
+ const take=s=>{let p=DQ.filter(q=>q.s===s&&!U.has(q.id));if(!p.length){DQ.filter(q=>q.s===s).forEach(q=>U.delete(q.id));p=DQ.filter(q=>q.s===s)}const c=p.sort(rn)[0];U.add(c.id);ids.push(c.id)};
+ const m=sb("Math"),e=sb("Reading & Writing");m.forEach(take);[...m].sort(rn).slice(0,3).forEach(take);e.forEach(take);e.forEach(take);
+ S.dused=[...U];save();return ids.sort(rn)};
+R.train=a=>{const T=S.tr;a.append($(`<h1>Training</h1>`));const f=$(`<div class="card"></div>`),box=$(`<div></div>`);a.append(f,box);
+ const key=()=>T.dom+"|"+T.sk+"|"+T.lv,idx=()=>T.pos[key()]||0;
+ const skills=()=>["All",...new Set(Q.filter(q=>T.dom==="All"||q.d===T.dom).map(q=>q.s))];
+ const chips=(lb,vals,k,fmt=x=>x)=>{const w=$(`<div><div class="meta">${lb}</div><div class="chips"></div></div>`);vals.forEach(v=>{const b=$(`<button class="${T[k]===v?"on":""}">${fmt(v)}</button>`);b.onclick=()=>{T[k]=v;if(k==="dom")T.sk="All";save();draw()};w.lastChild.append(b)});return w};
+ function draw(){if(!skills().includes(T.sk))T.sk="All";f.innerHTML="";
+  f.append(chips("Section",["All","Math","Reading & Writing"],"dom"),chips("Skill",skills(),"sk"),chips("Difficulty",[0,1,2,3],"lv",v=>v?LN[v]:"All"));
+  const ls=QS.filter(q=>(T.dom==="All"||q.d===T.dom)&&(T.sk==="All"||q.s===T.sk)&&(!T.lv||q.lv===T.lv));box.innerHTML="";
+  if(!ls.length){box.append($(`<div class="card">No questions match. Try another skill or difficulty.</div>`));return}
+  const i=Math.min(idx(),ls.length-1),q=ls[i];T.pos[key()]=i;
+  box.append($(`<div class="meta">Question ${i+1} of ${ls.length} · ${ls.filter(x=>x.id in S.sess).length} answered</div>`));
+  box.append(qcard(q,(ok,j)=>{S.sess[q.id]=j;S.log.push({id:q.id,ok});save()},{pre:S.sess[q.id]}));
+  const pv=$(`<button>Previous</button>`),nx=$(`<button class="p">Next question</button>`),rs=$(`<button>Retry this set</button>`);
+  pv.onclick=()=>{T.pos[key()]=(i-1+ls.length)%ls.length;save();draw()};nx.onclick=()=>{T.pos[key()]=(i+1)%ls.length;save();draw()};
+  rs.onclick=()=>{ls.forEach(x=>delete S.sess[x.id]);T.pos[key()]=0;save();draw()};box.append(pv," ",nx," ",rs)}
+ draw()};
+R.vocab=a=>{a.append($(`<h1>Vocab</h1>`));const box=$(`<div></div>`);a.append(box);
+ let h=0;for(const c of today())h=(h*31+c.charCodeAt(0))%997;
+ const daily=[0,1,2,3,4].map(k=>(h+k*7)%W.length);let q=[...daily],free=S.vd&&S.vd.date===today(),cnt=0,last=-1;
+ function card(i,top,onK,onR){box.innerHTML="";box.className="";box.append(top);const[w,d]=W[i];
+  const fl=$(`<div class="flip" tabindex="0" role="button" aria-label="Flip card"><div class="inner"><div class="face"><div>${w}<small>tap to flip</small></div></div><div class="face b"><div>${d}</div></div></div></div>`);
+  fl.onclick=()=>fl.classList.toggle("on");fl.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fl.click()}};
+  const k=$(`<button class="p">I know it</button>`),r=$(`<button>Review again</button>`);
+  const go=(c,fn)=>{fl.classList.add(c);k.disabled=r.disabled=true;setTimeout(fn,600)};
+  k.onclick=()=>go("gok",()=>{if(!S.known.includes(w))S.known.push(w);save();onK()});r.onclick=()=>go("gno",()=>{S.known=S.known.filter(x=>x!==w);save();onR()});box.append(fl,k," ",r)}
+ function dly(){if(!q.length){S.vd={date:today()};save();return fin()}
+  const n=5-q.length;card(q[0],$(`<div><p class="meta">Daily 5 · ${n} of 5 learned</p><div class="bar"><div style="width:${n*20}%"></div></div></div>`),()=>{q.shift();dly()},()=>{q.push(q.shift());dly()})}
+ function fin(){box.innerHTML=`<div class="card fade" style="text-align:center"><div class="check pop">✔</div><h2>Daily 5 complete</h2><p>You learned all five of today’s words. A fresh daily set arrives tomorrow.</p></div>`;
+  const b=$(`<button class="p">Keep going with unlimited words</button>`);b.onclick=()=>{free=true;unl()};box.append(b)}
+ function unl(){const pool=W.map((x,i)=>i).filter(i=>i!==last&&!S.known.includes(W[i][0]));const p=pool.length?pool:W.map((x,i)=>i).filter(i=>i!==last);
+  const i=p[Math.floor(Math.random()*p.length)];last=i;
+  card(i,$(`<p class="meta">Unlimited · ${cnt} known this session · ${S.known.length}/${W.length} words mastered overall</p>`),()=>{cnt++;unl()},()=>unl())}
+ free?unl():dly()};
+R.diagnostic=a=>{a.append($(`<h1>Diagnostic</h1>`));const box=$(`<div></div>`);a.append(box);
+ const swap=()=>{box.className="";void box.offsetWidth;box.className="fade";box.innerHTML=""};
+ function intro(){swap();box.append($(`<div class="card"><p>20 mixed questions, 25 minutes. Every diagnostic question is reserved for this test: none of them appear in Training or the daily questions, and retakes use questions you haven’t seen yet. Answers stay hidden until you submit, and you can change them any time. You’ll get accuracy by section and skill, then a full review.</p></div>`));
+  const go=$(`<button class="p">Start diagnostic</button>`);go.onclick=()=>{S.dg={ord:buildDiag(),ans:{},end:Date.now()+1500e3};S.dgr=null;save();test()};box.append(go)}
+ function test(){swap();const g=S.dg,tm=$(`<div class="timer"></div>`);box.append(tm);
+  const upd=()=>{const t=Math.max(0,Math.round((g.end-Date.now())/1000));tm.textContent=`${Math.floor(t/60)}:${String(t%60).padStart(2,"0")} · ${Object.keys(g.ans).length}/${g.ord.length} answered`;if(t<=0)submit()};
+  upd();IV=setInterval(upd,1000);
+  g.ord.forEach(id=>box.append(qcard(qm(id),(_,i)=>{g.ans[id]=i;save();upd()},{test:1,pre:g.ans[id]})));
+  const s=$(`<button class="p">Submit test</button>`);s.onclick=submit;box.append(s)}
+ function submit(){clearInterval(IV);const g=S.dg;if(!g)return;let c=0;const o={d:{},s:{}};
+  g.ord.forEach(id=>{const q=qm(id),ok=g.ans[id]===q.a;if(ok)c++;S.log.push({id,ok});[["d",q.d],["s",q.s]].forEach(([k,v])=>{o[k][v]=o[k][v]||{n:0,c:0};o[k][v].n++;if(ok)o[k][v].c++})});
+  S.dgr={c,n:g.ord.length,o,ord:g.ord,ans:g.ans};S.dg=null;save();window.scrollTo(0,0);results()}
+ function results(){swap();const r=S.dgr;
+  const sc=$(`<div class="card pop"><div class="meta">Test submitted. Here’s how you did.</div><b class="big">0</b> <span>/ ${r.n} correct</span><h2>By section</h2>${bars(r.o.d)}<h2>By skill</h2>${bars(r.o.s)}</div>`);box.append(sc);countUp(sc.querySelector(".big"),r.c);
+  box.append($(`<h2>Review your answers</h2>`));r.ord.forEach(id=>box.append(qcard(qm(id),()=>{},{pre:r.ans[id]==null?-1:r.ans[id]})));
+  const rt=$(`<button class="p">Retake diagnostic</button>`);rt.onclick=()=>{S.dgr=null;save();intro()};box.append(rt)}
+ S.dgr?results():S.dg?test():intro()};
+const tabs=[["home","Home"],["train","Training"],["vocab","Vocab"],["diagnostic","Diagnostic"]];
+function route(){clearInterval(IV);const h=(location.hash||"#home").slice(1),k=R[h]?h:"home";
+ document.getElementById("nav").innerHTML=tabs.map(([id,n])=>`<a href="#${id}" class="${id===k?"on":""}">${n}</a>`).join("");
+ const a=document.getElementById("app");a.className="";a.innerHTML="";void a.offsetWidth;a.className="fade";R[k](a)}
+addEventListener("hashchange",route);route();
+</script></body></html>
